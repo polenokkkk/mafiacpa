@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Аффилейт Мафия — Карточки ролей</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #FF2D2D;
+    --red-dark: #C41F1F;
+    --blue: #1A6CFF;
+    --blue-dark: #0D4DB3;
+    --gold: #FFB800;
+    --gold-dark: #CC9200;
+    --neutral: #2A2A2A;
+    --bg: #0E0E0E;
+    --surface: #161616;
+    --border: #2E2E2E;
+    --text: #F0F0F0;
+    --text-dim: #888;
+    --mono: 'IBM Plex Mono', monospace;
+    --display: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* HEADER */
+  header {
+    padding: 48px 40px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .logo-block h1 {
+    font-family: var(--display);
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -3px;
+    text-transform: uppercase;
+  }
+
+  .logo-block h1 span {
+    display: block;
+    color: var(--red);
+  }
+
+  .logo-block .tagline {
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .header-meta {
+    text-align: right;
+  }
+
+  .header-meta .players {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .filter-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .tab {
+    padding: 6px 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .tab:hover { border-color: #555; color: var(--text); }
+  .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .tab.active.red { background: var(--red); border-color: var(--red); color: #fff; }
+  .tab.active.blue { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .tab.active.gold { background: var(--gold); border-color: var(--gold); color: #000; }
+
+  /* MAIN GRID */
+  main {
+    padding: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2px;
+  }
+
+  /* CARD */
+  .card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px 24px 24px;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 360px;
+  }
+
+  .card.visible {
+    display: flex;
+    animation: fadeIn 0.3s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: #444;
+    z-index: 2;
+  }
+
+  /* FACTION STRIPE */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .card.red::before { background: var(--red); }
+  .card.blue::before { background: var(--blue); }
+  .card.gold::before { background: var(--gold); }
+
+  /* CARD ACCENT BG */
+  .card::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    opacity: 0.04;
+  }
+
+  .card.red::after { background: var(--red); }
+  .card.blue::after { background: var(--blue); }
+  .card.gold::after { background: var(--gold); }
+
+  .card-faction {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.5;
+  }
+
+  .card.red .card-faction { color: var(--red); opacity: 1; }
+  .card.blue .card-faction { color: var(--blue); opacity: 1; }
+  .card.gold .card-faction { color: var(--gold); opacity: 1; }
+
+  .card-emoji {
+    font-size: 48px;
+    line-height: 1;
+    filter: grayscale(0);
+  }
+
+  .card-name {
+    font-family: var(--display);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+
+  .card-analog {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: -8px;
+  }
+
+  .card-action {
+    display: inline-block;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-radius: 2px;
+    width: fit-content;
+  }
+
+  .card.red .card-action { background: rgba(255,45,45,0.15); color: var(--red); }
+  .card.blue .card-action { background: rgba(26,108,255,0.15); color: var(--blue); }
+  .card.gold .card-action { background: rgba(255,184,0,0.15); color: var(--gold); }
+
+  .card-desc {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #C0C0C0;
+    flex: 1;
+  }
+
+  .card-win {
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .card-win strong {
+    color: var(--text);
+    letter-spacing: 0.5px;
+  }
+
+  /* RULES SECTION */
+  .rules-section {
+    margin: 0 40px 40px;
+    border: 1px solid var(--border);
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  @media (max-width: 700px) {
+    .rules-section { grid-template-columns: 1fr; margin: 0 16px 32px; }
+    main { padding: 16px; }
+    header { padding: 24px 16px; }
+  }
+
+  .rules-col h3 {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rule-item {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+
+  .rule-num {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--border);
+    line-height: 1;
+    min-width: 24px;
+  }
+
+  .rule-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #B0B0B0;
+  }
+
+  .rule-text strong { color: var(--text); }
+
+  /* NIGHT SEQUENCE */
+  .night-sequence {
+    margin: 0 40px 40px;
+    border: 1px solid var(--border);
+    padding: 32px;
+  }
+
+  @media (max-width: 700px) {
+    .night-sequence { margin: 0 16px 32px; }
+  }
+
+  .night-sequence h3 {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sequence {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .seq-step {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-width: 120px;
+    padding: 0 16px;
+    position: relative;
+  }
+
+  .seq-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 20px;
+    width: 1px;
+    height: 40px;
+    background: var(--border);
+  }
+
+  .seq-num {
+    width: 40px; height: 40px;
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 14px;
+  }
+
+  .seq-step.red .seq-num { border-color: var(--red); color: var(--red); }
+  .seq-step.blue .seq-num { border-color: var(--blue); color: var(--blue); }
+  .seq-step.gold .seq-num { border-color: var(--gold); color: var(--gold); }
+
+  .seq-role {
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .seq-action {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* GLOSSARY */
+  .glossary {
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+    padding: 0 40px 40px;
+  }
+
+  @media (max-width: 700px) { .glossary { padding: 0 16px 32px; } }
+
+  .gloss-item {
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    flex: 1 0 200px;
+  }
+
+  .gloss-term {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--red);
+    white-space: nowrap;
+  }
+
+  .gloss-def {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  /* PRINT BUTTON */
+  .print-bar {
+    margin: 0 40px 40px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 700px) { .print-bar { margin: 0 16px 32px; } }
+
+  .btn {
+    padding: 12px 24px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+
+  .btn-primary:hover { background: var(--red); border-color: var(--red); color: #fff; }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text-dim);
+    border-color: var(--border);
+  }
+
+  .btn-outline:hover { border-color: #555; color: var(--text); }
+
+  .print-note {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* SECTION DIVIDER */
+  .section-label {
+    padding: 24px 40px 16px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 700px) { .section-label { padding: 24px 16px 12px; } }
+
+  /* FLIP ANIMATION */
+  .card.flipped .card-inner {
+    transform: rotateY(180deg);
+  }
+
+  /* MODAL / FLIP VIEW */
+  .card-detail {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    backdrop-filter: blur(4px);
+  }
+
+  .card-detail.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .detail-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    max-width: 480px;
+    width: 100%;
+    padding: 40px;
+    position: relative;
+    transform: scale(0.96);
+    transition: transform 0.2s;
+  }
+
+  .card-detail.open .detail-box { transform: scale(1); }
+
+  .detail-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+
+  .detail-close:hover { border-color: var(--red); color: var(--red); }
+
+  .detail-faction { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600; }
+  .detail-emoji { font-size: 64px; display: block; margin-bottom: 16px; }
+  .detail-name { font-family: var(--display); font-size: 40px; font-weight: 800; letter-spacing: -2px; line-height: 1; margin-bottom: 6px; }
+  .detail-analog { font-size: 11px; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px; }
+
+  .detail-section { margin-bottom: 20px; }
+  .detail-section-label { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; }
+  .detail-section-text { font-size: 14px; line-height: 1.7; color: #C0C0C0; }
+
+  .detail-action-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  /* PRINT STYLES */
+  @media print {
+    body { background: #fff !important; color: #000 !important; }
+    body::before { display: none; }
+    header, .filter-tabs, .rules-section, .night-sequence, .glossary, .print-bar, .section-label { display: none !important; }
+    main {
+      display: grid !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 4mm !important;
+      padding: 8mm !important;
+    }
+    .card {
+      display: flex !important;
+      page-break-inside: avoid;
+      border: 1.5pt solid #000 !important;
+      background: #fff !important;
+      color: #000 !important;
+      min-height: 90mm !important;
+    }
+    .card::before { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card::after { display: none; }
+    .card-desc { color: #333 !important; }
+    .card-analog { color: #666 !important; }
+    .card-win { color: #555 !important; border-color: #ccc !important; }
+    .card-win strong { color: #000 !important; }
+    .card.red .card-action { background: #ffe5e5 !important; color: #c00 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card.blue .card-action { background: #e5eeff !important; color: #004bd4 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card.gold .card-action { background: #fff8e0 !important; color: #8a6200 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card-detail { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-block">
+    <h1>Аффилейт<span>Мафия</span></h1>
+    <p class="tagline">CPA Edition — Карточки ролей</p>
+  </div>
+  <div class="header-meta">
+    <p class="players">6–12 игроков</p>
+    <div class="filter-tabs">
+      <button class="tab active" onclick="filter('all', this)">Все роли</button>
+      <button class="tab red" onclick="filter('red', this)">🔴 Фрод</button>
+      <button class="tab blue" onclick="filter('blue', this)">🔵 Честные</button>
+      <button class="tab gold" onclick="filter('gold', this)">🟡 Нейтрал</button>
+    </div>
+  </div>
+</header>
+
+<div class="section-label">// Карточки ролей — нажми для деталей</div>
+<main id="cards-grid">
+
+  <!-- MAFIA -->
+  <div class="card red visible" onclick="openDetail('frodmaster')">
+    <div class="card-faction">🔴 Фрод-команда</div>
+    <div class="card-emoji">🕵️</div>
+    <div class="card-name">Фродмастер</div>
+    <div class="card-analog">= Дон Мафии</div>
+    <div class="card-action">⚡ Действие ночью</div>
+    <div class="card-desc">Главный фродер сети. Каждую ночь выбирает одного игрока и «банит» его аккаунт — тот выбывает из игры.</div>
+    <div class="card-win"><strong>Победа:</strong> когда фрод-команда по численности равна честным игрокам.</div>
+  </div>
+
+  <div class="card red visible" onclick="openDetail('kliker')">
+    <div class="card-faction">🔴 Фрод-команда</div>
+    <div class="card-emoji">🖱️</div>
+    <div class="card-name">Кликер</div>
+    <div class="card-analog">= Пособник</div>
+    <div class="card-action">🛡️ Прикрытие ночью</div>
+    <div class="card-desc">Генерирует «чистый» трафик как прикрытие. Может выбрать одного члена фрод-команды — если аффилейт-менеджер проверяет его, видит «чист».</div>
+    <div class="card-win"><strong>Победа:</strong> вместе с фрод-командой.</div>
+  </div>
+
+  <div class="card red visible" onclick="openDetail('drop')">
+    <div class="card-faction">🔴 Фрод-команда</div>
+    <div class="card-emoji">👻</div>
+    <div class="card-name">Дроп</div>
+    <div class="card-analog">= Молчун</div>
+    <div class="card-action">⏳ Пассив 2 раунда</div>
+    <div class="card-desc">Регистрирует «серые» аккаунты и наблюдает. Первые 2 раунда не голосует и не раскрывается — просто собирает информацию.</div>
+    <div class="card-win"><strong>Победа:</strong> вместе с фрод-командой.</div>
+  </div>
+
+  <!-- ЧЕСТНЫЕ -->
+  <div class="card blue visible" onclick="openDetail('am')">
+    <div class="card-faction">🔵 Честная команда</div>
+    <div class="card-emoji">🎯</div>
+    <div class="card-name">Аффилейт-менеджер</div>
+    <div class="card-analog">= Комиссар</div>
+    <div class="card-action">🔍 Проверка ночью</div>
+    <div class="card-desc">Каждую ночь «пробивает» одного игрока по базе и получает ответ: ФРОД или ЧИСТ. Главный детектив команды.</div>
+    <div class="card-win"><strong>Победа:</strong> когда все фродеры выведены из игры.</div>
+  </div>
+
+  <div class="card blue visible" onclick="openDetail('advertiser')">
+    <div class="card-faction">🔵 Честная команда</div>
+    <div class="card-emoji">💼</div>
+    <div class="card-name">Рекламодатель</div>
+    <div class="card-analog">= Доктор</div>
+    <div class="card-action">❄️ Фриз ночью</div>
+    <div class="card-desc">«Замораживает» выплаты одному игроку на ночь — фродмастер не может забанить этого игрока. Выбирает жертву заранее, не зная планов фрода.</div>
+    <div class="card-win"><strong>Победа:</strong> вместе с честной командой.</div>
+  </div>
+
+  <div class="card blue visible" onclick="openDetail('analyst')">
+    <div class="card-faction">🔵 Честная команда</div>
+    <div class="card-emoji">📊</div>
+    <div class="card-name">Аналитик</div>
+    <div class="card-analog">= Детектив-подмога</div>
+    <div class="card-action">📈 Раз за игру</div>
+    <div class="card-desc">Один раз за всю игру может запросить «историю голосований» любого игрока — ведущий называет, сколько раз тот менял свою позицию.</div>
+    <div class="card-win"><strong>Победа:</strong> вместе с честной командой.</div>
+  </div>
+
+  <div class="card blue visible" onclick="openDetail('moderator')">
+    <div class="card-faction">🔵 Честная команда</div>
+    <div class="card-emoji">⚖️</div>
+    <div class="card-name">Модератор сети</div>
+    <div class="card-analog">= Мэр</div>
+    <div class="card-action">✌️ Голос ×2</div>
+    <div class="card-desc">Его слово весомее. При финальном голосовании за выбывшего его голос считается как два. Раскрывает роль публично в начале игры.</div>
+    <div class="card-win"><strong>Победа:</strong> вместе с честной командой.</div>
+  </div>
+
+  <div class="card blue visible" onclick="openDetail('webmaster')">
+    <div class="card-faction">🔵 Честная команда</div>
+    <div class="card-emoji">🌐</div>
+    <div class="card-name">Вебмастер</div>
+    <div class="card-analog">= Мирный житель</div>
+    <div class="card-action">💬 Голос и анализ</div>
+    <div class="card-desc">Честный вебмастер без спецспособностей. Единственное оружие — наблюдательность, логика и умение убеждать на дневном созвоне.</div>
+    <div class="card-win"><strong>Победа:</strong> вместе с честной командой.</div>
+  </div>
+
+  <!-- NEUTRAL -->
+  <div class="card gold visible" onclick="openDetail('buyer')">
+    <div class="card-faction">🟡 Нейтрал</div>
+    <div class="card-emoji">💰</div>
+    <div class="card-name">Баер</div>
+    <div class="card-analog">= Маньяк</div>
+    <div class="card-action">🌀 Скрутка ночью</div>
+    <div class="card-desc">Играет только за себя. Каждую ночь «скручивает» одного игрока — тот пропускает следующее голосование. Побеждает, если остаётся последним.</div>
+    <div class="card-win"><strong>Победа:</strong> остаться последним игроком любой фракции.</div>
+  </div>
+
+  <div class="card gold visible" onclick="openDetail('seo')">
+    <div class="card-faction">🟡 Нейтрал</div>
+    <div class="card-emoji">🔮</div>
+    <div class="card-name">SEO-шник</div>
+    <div class="card-analog">= Оборотень</div>
+    <div class="card-action">🎭 Маскировка</div>
+    <div class="card-desc">Выглядит как фрод для аффилейт-менеджера при проверке — получает ответ «ФРОД». Но на самом деле играет за честную команду и хочет их победы.</div>
+    <div class="card-win"><strong>Победа:</strong> вместе с честной командой, несмотря на маскировку.</div>
+  </div>
+
+</main>
+
+<!-- NIGHT SEQUENCE -->
+<div class="section-label">// Порядок ночных действий</div>
+<div class="night-sequence">
+  <h3>Ночной созвон — последовательность просыпания</h3>
+  <div class="sequence">
+    <div class="seq-step red">
+      <div class="seq-num">01</div>
+      <div class="seq-role">Фрод-команда</div>
+      <div class="seq-action">Фродмастер<br>выбирает жертву</div>
+    </div>
+    <div class="seq-step red">
+      <div class="seq-num">02</div>
+      <div class="seq-role">Кликер</div>
+      <div class="seq-action">Прикрывает<br>одного фродера</div>
+    </div>
+    <div class="seq-step blue">
+      <div class="seq-num">03</div>
+      <div class="seq-role">Рекламодатель</div>
+      <div class="seq-action">Фризит<br>одного игрока</div>
+    </div>
+    <div class="seq-step blue">
+      <div class="seq-num">04</div>
+      <div class="seq-role">Аффилейт-менеджер</div>
+      <div class="seq-action">Проверяет<br>одного игрока</div>
+    </div>
+    <div class="seq-step gold">
+      <div class="seq-num">05</div>
+      <div class="seq-role">Баер</div>
+      <div class="seq-action">Скручивает<br>одного (опционально)</div>
+    </div>
+    <div class="seq-step blue">
+      <div class="seq-num">06</div>
+      <div class="seq-role">Аналитик</div>
+      <div class="seq-action">Запрос истории<br>(1 раз за игру)</div>
+    </div>
+  </div>
+</div>
+
+<!-- RULES -->
+<div class="section-label">// Правила игры</div>
+<div class="rules-section">
+  <div class="rules-col">
+    <h3>День — Дневной созвон</h3>
+    <div class="rule-item">
+      <div class="rule-num">01</div>
+      <div class="rule-text">Ведущий объявляет, кого <strong>забанили ночью</strong> (если игрок не был зафризен рекламодателем)</div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-num">02</div>
+      <div class="rule-text"><strong>Открытое обсуждение</strong> — каждый высказывается, выдвигает подозрения, защищается</div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-num">03</div>
+      <div class="rule-text"><strong>Голосование</strong> — кто набрал большинство, тот выбывает («коллективный чарджбэк»)</div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-num">04</div>
+      <div class="rule-text">Ведущий <strong>раскрывает роль</strong> выбывшего. Наступает ночь</div>
+    </div>
+  </div>
+  <div class="rules-col">
+    <h3>Условия победы</h3>
+    <div class="rule-item">
+      <div class="rule-num" style="color: var(--red)">🔴</div>
+      <div class="rule-text"><strong>Фрод-команда:</strong> побеждают, когда их число равно или превышает число честных игроков</div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-num" style="color: var(--blue)">🔵</div>
+      <div class="rule-text"><strong>Честная команда:</strong> вычисляют и выводят всех фродеров из игры</div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-num" style="color: var(--gold)">🟡</div>
+      <div class="rule-text"><strong>Баер:</strong> остаётся последним игроком независимо от фракции</div>
+    </div>
+    <div class="rule-item">
+      <div class="rule-num" style="color: var(--gold)">🔮</div>
+      <div class="rule-text"><strong>SEO-шник:</strong> побеждает вместе с честной командой, даже если до конца казался фродером</div>
+    </div>
+  </div>
+</div>
+
+<!-- GLOSSARY -->
+<div class="section-label">// Словарь ведущего — аффилейт-язык</div>
+<div class="glossary">
+  <div class="gloss-item">
+    <div class="gloss-term">Забанен</div>
+    <div class="gloss-def">= Убит. «Аккаунт игрока заблокирован»</div>
+  </div>
+  <div class="gloss-item">
+    <div class="gloss-term">Ночь</div>
+    <div class="gloss-def">= «Оффер упал, трафик встал»</div>
+  </div>
+  <div class="gloss-item">
+    <div class="gloss-term">День</div>
+    <div class="gloss-def">= «Командный созвон»</div>
+  </div>
+  <div class="gloss-item">
+    <div class="gloss-term">Голосование</div>
+    <div class="gloss-def">= «Коллективный чарджбэк»</div>
+  </div>
+  <div class="gloss-item">
+    <div class="gloss-term">Чист / Фрод</div>
+    <div class="gloss-def">= Ответ при проверке аффилейт-менеджером</div>
+  </div>
+  <div class="gloss-item">
+    <div class="gloss-term">Фриз</div>
+    <div class="gloss-def">= Защита рекламодателем на одну ночь</div>
+  </div>
+</div>
+
+<!-- PRINT BAR -->
+<div class="print-bar">
+  <button class="btn btn-primary" onclick="window.print()">🖨️ Распечатать карточки</button>
+  <button class="btn btn-outline" onclick="filter('all', document.querySelector('.tab'))">Показать все</button>
+  <span class="print-note">При печати отображаются только карточки ролей (3 в ряд, формат А4)</span>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="card-detail" id="detail-modal" onclick="closeDetail(event)">
+  <div class="detail-box">
+    <button class="detail-close" onclick="closeDetail()">✕ закрыть</button>
+    <div class="detail-faction" id="d-faction"></div>
+    <span class="detail-emoji" id="d-emoji"></span>
+    <div class="detail-name" id="d-name"></div>
+    <div class="detail-analog" id="d-analog"></div>
+    <div class="detail-action-badge" id="d-action"></div>
+    <div class="detail-section">
+      <div class="detail-section-label">Кто ты</div>
+      <div class="detail-section-text" id="d-desc"></div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-label">Цель победы</div>
+      <div class="detail-section-text" id="d-win"></div>
+    </div>
+    <div class="detail-section" id="d-tip-section">
+      <div class="detail-section-label">Совет новичку</div>
+      <div class="detail-section-text" id="d-tip"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const roles = {
+  frodmaster: {
+    faction: '🔴 Фрод-команда', emoji: '🕵️', name: 'Фродмастер', analog: 'Аналог: Дон Мафии',
+    action: '⚡ Действие каждую ночь', color: 'var(--red)',
+    desc: 'Ты — главный в фрод-команде. Знаешь своих сообщников. Каждую ночь выбираешь одного игрока и «баниш» его аккаунт — он выбывает из игры. Действуй тихо, не раскрывай фрод-команду.',
+    win: 'Побеждаешь, когда численность фрод-команды становится равна или больше числа честных игроков.',
+    tip: 'Молчи и наблюдай. Не атакуй аффилейт-менеджера в первую ночь — слишком очевидно. Банить неактивных или слишком говорливых игроков безопаснее.'
+  },
+  kliker: {
+    faction: '🔴 Фрод-команда', emoji: '🖱️', name: 'Кликер', analog: 'Аналог: Пособник',
+    action: '🛡️ Прикрытие ночью (опционально)', color: 'var(--red)',
+    desc: 'Ты создаёшь «чистый» трафик как прикрытие для фрод-команды. Каждую ночь можешь выбрать одного члена команды фрода — если аффилейт-менеджер проверяет его этой ночью, он получает ответ «ЧИСТ».',
+    win: 'Побеждаешь вместе с фрод-командой.',
+    tip: 'Прикрывай фродмастера в первые ночи — он самый ценный. Если аффилейт-менеджер раскрылся, начни прикрывать его предполагаемые цели.'
+  },
+  drop: {
+    faction: '🔴 Фрод-команда', emoji: '👻', name: 'Дроп', analog: 'Аналог: Молчун',
+    action: '⏳ Пассивен первые 2 раунда', color: 'var(--red)',
+    desc: 'Ты регистрируешь «серые» аккаунты и наблюдаешь. Первые 2 дневных раунда не участвуешь в голосовании и ничем не выдаёшь себя. Используй это время, чтобы понять расстановку сил.',
+    win: 'Побеждаешь вместе с фрод-командой.',
+    tip: 'Притворись обычным вебмастером. После 2 раундов молчания ты выглядишь «скромным» — используй это, чтобы неожиданно сдвинуть голосование в нужную сторону.'
+  },
+  am: {
+    faction: '🔵 Честная команда', emoji: '🎯', name: 'Аффилейт-менеджер', analog: 'Аналог: Комиссар',
+    action: '🔍 Проверка одного игрока каждую ночь', color: 'var(--blue)',
+    desc: 'Ты — главный детектив честной команды. Каждую ночь «пробиваешь» одного игрока по базе и получаешь от ведущего ответ: ФРОД или ЧИСТ. Информация только у тебя.',
+    win: 'Побеждаешь, когда все фродеры выведены из игры.',
+    tip: 'Не раскрывайся первым. Если раскроешься — Кликер начнёт прикрывать фродеров именно от тебя. Делись информацией осторожно, только с теми, кому доверяешь.'
+  },
+  advertiser: {
+    faction: '🔵 Честная команда', emoji: '💼', name: 'Рекламодатель', analog: 'Аналог: Доктор',
+    action: '❄️ Фриз одного игрока каждую ночь', color: 'var(--blue)',
+    desc: 'Ты «замораживаешь» выплаты одному игроку на ночь — Фродмастер не может забанить его этой ночью. Можешь защищать себя. Выбираешь жертву не зная планов фрода.',
+    win: 'Побеждаешь вместе с честной командой.',
+    tip: 'В начале защищай тех, кто активно вычисляет фрод — они первоочередные цели. Если знаешь аффилейт-менеджера, прикрывай его.'
+  },
+  analyst: {
+    faction: '🔵 Честная команда', emoji: '📊', name: 'Аналитик', analog: 'Аналог: Детектив-подмога',
+    action: '📈 Один запрос за всю игру', color: 'var(--blue)',
+    desc: 'Один раз за всю игру можешь запросить «историю голосований» любого игрока. Ведущий называет, сколько раз тот менял свою позицию при голосованиях. Фродеры обычно дрейфуют — они голосуют с большинством.',
+    win: 'Побеждаешь вместе с честной командой.',
+    tip: 'Не трать способность в первый раунд. Используй её в середине игры на самого подозрительного — много смен позиции говорит о фроде.'
+  },
+  moderator: {
+    faction: '🔵 Честная команда', emoji: '⚖️', name: 'Модератор сети', analog: 'Аналог: Мэр',
+    action: '✌️ Голос считается за 2', color: 'var(--blue)',
+    desc: 'Ты раскрываешь свою роль публично в самом начале игры. Твой голос при финальном голосовании считается за два. Ты — лидер дневных обсуждений.',
+    win: 'Побеждаешь вместе с честной командой.',
+    tip: 'Твоя известность — это и сила, и мишень. Рекламодателю стоит прикрывать тебя, пока ты не будешь в безопасности. Используй авторитет, чтобы двигать обсуждение.'
+  },
+  webmaster: {
+    faction: '🔵 Честная команда', emoji: '🌐', name: 'Вебмастер', analog: 'Аналог: Мирный житель',
+    action: '💬 Голос и логика', color: 'var(--blue)',
+    desc: 'Ты честный вебмастер без спецспособностей. Твоё единственное оружие — наблюдательность, логика и умение убеждать команду на дневном созвоне.',
+    win: 'Побеждаешь, когда все фродеры выведены из игры.',
+    tip: 'Смотри на поведение: кто слишком молчит? Кто резко меняет позицию? Кто голосует последним, подстраиваясь под большинство? Это маркеры фрода.'
+  },
+  buyer: {
+    faction: '🟡 Нейтральный', emoji: '💰', name: 'Баер', analog: 'Аналог: Маньяк',
+    action: '🌀 Скрутка одного игрока ночью', color: 'var(--gold)',
+    desc: 'Ты играешь только за себя. Каждую ночь можешь «скрутить» одного игрока — он пропускает следующее дневное голосование. Твоя цель: пережить всех.',
+    win: 'Побеждаешь, если остаёшься последним живым игроком — независимо от фракций.',
+    tip: 'Устраняй тех, кто к тебе подозрителен. Скручивай лидеров голосований, чтобы их не послушали. Притворяйся честным, пока не останешься один.'
+  },
+  seo: {
+    faction: '🟡 Нейтральный', emoji: '🔮', name: 'SEO-шник', analog: 'Аналог: Оборотень',
+    action: '🎭 Маскировка под фрод', color: 'var(--gold)',
+    desc: 'Ты выглядишь как фродер для аффилейт-менеджера — при проверке он получает ответ «ФРОД». Но на самом деле ты играешь за честную команду и хочешь их победы.',
+    win: 'Побеждаешь вместе с честной командой, даже если до конца выглядел подозрительно.',
+    tip: 'Тебе нужно убедить честных, что ты не фрод, пока аффилейт-менеджер думает обратное. Раскройся стратегически — когда команда тебе уже доверяет.'
+  }
+};
+
+function openDetail(id) {
+  const r = roles[id];
+  if (!r) return;
+  document.getElementById('d-faction').textContent = r.faction;
+  document.getElementById('d-faction').style.color = r.color;
+  document.getElementById('d-emoji').textContent = r.emoji;
+  document.getElementById('d-name').textContent = r.name;
+  document.getElementById('d-analog').textContent = r.analog;
+  const action = document.getElementById('d-action');
+  action.textContent = r.action;
+  action.style.background = r.color + '22';
+  action.style.color = r.color;
+  document.getElementById('d-desc').textContent = r.desc;
+  document.getElementById('d-win').textContent = r.win;
+  document.getElementById('d-tip').textContent = r.tip;
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function closeDetail(e) {
+  if (!e || e.target === document.getElementById('detail-modal') || e.currentTarget?.classList?.contains('detail-close')) {
+    document.getElementById('detail-modal').classList.remove('open');
+  }
+}
+
+function filter(type, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.card').forEach(card => {
+    if (type === 'all' || card.classList.contains(type)) {
+      card.classList.add('visible');
+    } else {
+      card.classList.remove('visible');
+    }
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('detail-modal').classList.remove('open');
+});
+</script>
+</body>
+</html>
